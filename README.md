@@ -13,20 +13,20 @@ A full-stack **property booking** demo: REST APIs for users, rental properties, 
 
 | Folder | Role |
 |--------|------|
-| [`server/`](server/) | **Primary API** — Node.js, **Express**, **TypeORM**, `pg`. Hand-rolled routes, services, and centralized HTTP error handling. |
-| [`backend/`](backend/) | **Alternate API** — **NestJS** implementation of the same domain (modules, DI, cache interceptor). Useful to compare frameworks. |
+| [`node-server/`](node-server/) | **Primary API** — Node.js, **Express**, **TypeORM**, `pg`. Hand-rolled routes, services, and centralized HTTP error handling. |
+| [`nest-server/`](nest-server/) | **Alternate API** — **NestJS** implementation of the same domain (modules, DI, cache interceptor). Useful to compare frameworks. |
 | [`frontend/`](frontend/) | **React + Vite** “API explorer” — tabs for users, properties, and bookings; sends `fetch` requests and shows JSON responses. |
 
-All backends expect a PostgreSQL database (default name `booking_app`). TypeORM `synchronize` is enabled for local development (schema is inferred from entities; **turn this off and use migrations in production**).
+Both `node-server` and `nest-server` expect a PostgreSQL database (default name `booking_app`). TypeORM `synchronize` is enabled for local development (schema is inferred from entities; **turn this off and use migrations in production**).
 
 ## Tech stack
 
 - **Runtime:** Node.js  
 - **Languages:** TypeScript  
-- **APIs:** Express (`server`) or NestJS (`backend`)  
+- **APIs:** Express (`node-server`) or NestJS (`nest-server`)  
 - **ORM:** TypeORM  
 - **Database:** PostgreSQL  
-- **Caching:** `apicache` on GET requests (`server`); `@nestjs/cache-manager` (`backend`)  
+- **Caching:** `apicache` on GET requests (`node-server`); `@nestjs/cache-manager` (`nest-server`)  
 - **Frontend:** React 19, Vite 8  
 
 ## Features (high level)
@@ -36,7 +36,7 @@ All backends expect a PostgreSQL database (default name `booking_app`). TypeORM 
 - **Availability endpoint** for a property between two query dates
 - **CORS** enabled on the APIs for browser clients
 - **GET response caching** (short TTL) to reduce repeated read load during development
-- **Structured errors** (`server`: `HttpError` + middleware → JSON status bodies)
+- **Structured errors** (`node-server`: `HttpError` + middleware → JSON status bodies)
 
 ## Data model
 
@@ -44,7 +44,7 @@ All backends expect a PostgreSQL database (default name `booking_app`). TypeORM 
 - **Property** — id, title, location, price_per_night, availability; one-to-many **bookings**
 - **Booking** — id, user, property, start_date, end_date (many-to-one to user and property)
 
-Entities for the Express app live in [`server/src/entities/entities.ts`](server/src/entities/entities.ts).
+Entities for the Express app live in [`node-server/src/entities/entities.ts`](node-server/src/entities/entities.ts).
 
 ## Prerequisites
 
@@ -58,12 +58,12 @@ Connection defaults are defined in code (host `localhost`, port `5432`). For a p
 
 ### 1. Database
 
-Create the database and ensure the user/password in [`server/src/data-source.ts`](server/src/data-source.ts) match your Postgres instance.
+Create the database and ensure the user/password in [`node-server/src/data-source.ts`](node-server/src/data-source.ts) match your Postgres instance.
 
-### 2. API (`server`)
+### 2. API (`node-server`)
 
 ```bash
-cd server
+cd node-server
 npm install
 npm run start:dev
 ```
@@ -87,7 +87,7 @@ Optional: point the UI at a different API with `VITE_API_URL`, e.g. `VITE_API_UR
 ## Quick start — Nest API (optional)
 
 ```bash
-cd backend
+cd nest-server
 npm install
 ```
 
@@ -97,11 +97,11 @@ Configure the database in the Nest `DatabaseModule` / providers to match your Po
 npm run start:dev
 ```
 
-Use the same PostgreSQL database name if you want a single DB; do not run two apps that both `synchronize` against the same schema carelessly—prefer one active backend or disable synchronize and use migrations.
+Use the same PostgreSQL database name if you want a single DB; do not run two apps that both `synchronize` against the same schema carelessly—prefer running only one of `node-server` or `nest-server` against that DB at a time, or disable synchronize and use migrations.
 
-## API reference (Express `server`)
+## API reference (Express `node-server`)
 
-Base path: mount points below are relative to the server root (e.g. `http://localhost:3000/user`).
+Base path: mount points below are relative to the Express app root (e.g. `http://localhost:3000/user`).
 
 | Method | Path | Description |
 |--------|------|---------------|
@@ -122,17 +122,17 @@ Base path: mount points below are relative to the server root (e.g. `http://loca
 }
 ```
 
-The Nest `backend` exposes analogous routes under its module structure; see that project’s controllers for exact paths and DTOs.
+The Nest `nest-server` exposes analogous routes under its module structure; see that project’s controllers for exact paths and DTOs.
 
 ## Scripts summary
 
 | Location | Command | Purpose |
 |----------|---------|---------|
-| `server` | `npm run start:dev` | Express + TypeORM with `tsx watch` |
-| `server` | `npm run build` / `npm start` | Production build + run |
+| `node-server` | `npm run start:dev` | Express + TypeORM with `tsx watch` |
+| `node-server` | `npm run build` / `npm start` | Production build + run |
 | `frontend` | `npm run dev` | Vite dev server |
 | `frontend` | `npm run build` | Production bundle |
-| `backend` | `npm run start:dev` | Nest watch mode |
+| `nest-server` | `npm run start:dev` | Nest watch mode |
 
 ## License
 
